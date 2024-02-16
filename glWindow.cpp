@@ -3,30 +3,36 @@
 #include <stdexcept>
 #include <iostream>
 
-void sizeCallback(GLFWwindow* window, int width, int height)
+static void sizeCallback(GLFWwindow* window, int width, int height)
 {
-    Window* const win = (Window*)glfwGetWindowUserPointer(window);
+    glWindow* const win = static_cast<glWindow*>(glfwGetWindowUserPointer(window));
     if (win)
         win->setSize(width, height);
 }
 
 
-Window::Window(const std::string &title, int width, int height, bool fullscreen)
+glWindow::glWindow(const std::string &title, int width, int height, bool fullscreen)
     : m_window(nullptr)
-    , m_frameTimes({})
+    , m_frameTimes{}
     , m_lastFrame(glfwGetTime())
     , m_frameTimeIndex(0)
     , m_width(width)
     , m_height(height)
 {
     if (m_height == -1)
-        m_height = (int)ceil(m_width * (9.0/16.0));
+        m_height = int( ceil(m_width * (9.0/16.0)) );
     
     // Using OpenGL 4.6 for direct state access
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_OPENGL_PROFILE,        GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+#ifdef DEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#endif
 
     // Enable 10-Bit Colors, if available
     glfwWindowHint(GLFW_RED_BITS, 10);
@@ -44,6 +50,8 @@ Window::Window(const std::string &title, int width, int height, bool fullscreen)
     }
 
     makeCurrent();
+
+    glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, m_width, m_height);
     glfwSetWindowUserPointer(m_window, this);
 
@@ -52,28 +60,28 @@ Window::Window(const std::string &title, int width, int height, bool fullscreen)
 
 
 
-void Window::swap() const noexcept
+void glWindow::swap() const noexcept
 {
     const double t = glfwGetTime();
+    m_frameTimeIndex %= N_FRAMETIMES;
     m_frameTimes[m_frameTimeIndex++] = t - m_lastFrame;
-    m_frameTimeIndex %= __N_FRAMETIMES;
     m_lastFrame = t;
 
     glfwSwapBuffers(m_window);
 }
 
 
-void Window::setWidth(int width)
+void glWindow::setWidth(int width)
 {
     setSize(width, m_height);
 }
 
-void Window::setHeight(int height)
+void glWindow::setHeight(int height)
 {
     setSize(m_width, height);
 }
 
-void Window::setSize(int width, int height)
+void glWindow::setSize(int width, int height)
 {
     m_width = width;
     m_height = height;
