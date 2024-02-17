@@ -11,6 +11,7 @@ static void sizeCallback(GLFWwindow* window, int width, int height)
 }
 
 
+
 glWindow::glWindow(const std::string &title, int width, int height, bool fullscreen)
     : m_window(nullptr)
     , m_frameTimes{}
@@ -23,12 +24,11 @@ glWindow::glWindow(const std::string &title, int width, int height, bool fullscr
         m_height = int( ceil(m_width * (9.0/16.0)) );
     
     // Using OpenGL 4.6 for direct state access
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE,        GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_FALSE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 #ifdef DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);

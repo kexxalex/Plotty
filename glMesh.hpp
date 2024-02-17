@@ -14,6 +14,10 @@ public:
          const std::vector<std::pair<std::string, float>> &columns,
          GLenum mode);
 
+    Mesh(std::vector<float> &&positions,
+         uint32_t stride,
+         GLenum mode);
+
     void push();
 
     void render() const;

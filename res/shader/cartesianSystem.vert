@@ -1,14 +1,13 @@
 #version 420 core
 
 layout (location=0) in vec3 P;
-layout (location=1) in float T;
 
 uniform mat4 MVP;
 
-smooth out float segment;
+out vec3 pos;
 
 void main()
 {
-    segment = T;
+    pos = P;
     gl_Position = MVP * vec4(P, 1.0);
 }

@@ -57,6 +57,18 @@ Mesh::Mesh(const CSVFile &csv, const std::vector<std::pair<std::string, float>> 
 }
 
 
+Mesh::Mesh(std::vector<float> &&positions, uint32_t stride, GLenum mode)
+    : m_vaoID(0)
+    , m_vboID(0)
+    , m_mode(mode)
+    , m_stride(stride)
+    , m_length(positions.size() / stride)
+    , m_vertices(positions)
+{
+
+}
+
+
 void Mesh::push()
 {
     if (m_vaoID || m_vboID)

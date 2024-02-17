@@ -1,6 +1,6 @@
-#version 330 core
+#version 420 core
 
-layout (location=0) out vec3 fragColor;
+layout (location=0) out vec4 fragColor;
 
 smooth in float segment;
 
@@ -14,5 +14,5 @@ vec3 hsv2rgb(vec3 c) {
 
 void main()
 {
-    fragColor = hsv2rgb(vec3(segment, 1.0, 1.0));
+    fragColor = vec4(hsv2rgb(vec3(segment, 1.0, 1.0)), 1.0);
 }
