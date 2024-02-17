@@ -14,10 +14,10 @@ class CSVFile
 public:
     CSVFile(const std::string &filename);
 
-    void read(const char separator = ',');
+    bool read(const char separator = ',');
 
     const std::vector<std::string> * getColumn(const std::string &name) const noexcept;
-    constexpr uint32_t getColCount() const noexcept { return uint32_t(m_header.size()); }
+    uint32_t getColCount() const noexcept;
     constexpr uint32_t getRowCount() const noexcept { return m_rows; }
 
 protected:

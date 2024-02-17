@@ -37,6 +37,9 @@ static std::vector<std::string> readCSVLine(const std::string &line, const char 
 }
 
 
+uint32_t CSVFile::getColCount() const noexcept { return uint32_t(m_header.size()); }
+
+
 CSVFile::CSVFile(const std::string &filename)
     : m_filename(filename)
     , m_hasData(false)
@@ -46,16 +49,16 @@ CSVFile::CSVFile(const std::string &filename)
         std::cerr << "File \"" << m_filename << "\" does not exist." << std::endl;
 }
 
-void CSVFile::read(const char separator)
+bool CSVFile::read(const char separator)
 {
     if (!m_isOk)
-        return;
+        return false;
 
     std::ifstream f(m_filename);
     if (!f)
     {
         std::cerr << "Cannot read file \"" << m_filename << "\"" << std::endl;
-        return;
+        return false;
     }
 
     std::string headerLine;
@@ -86,6 +89,7 @@ void CSVFile::read(const char separator)
     std::cout << "Read " << m_rows << " data lines" << std::endl;
 
     m_hasData = true;
+    return true;
 }
 
 

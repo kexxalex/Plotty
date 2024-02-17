@@ -1,4 +1,4 @@
-#version 330 core
+#version 320 es
 
 layout (location=0) in vec3 P;
 layout (location=1) in float T;
