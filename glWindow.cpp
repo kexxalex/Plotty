@@ -5,14 +5,14 @@
 
 static void sizeCallback(GLFWwindow* window, int width, int height)
 {
-    glWindow* const win = static_cast<glWindow*>(glfwGetWindowUserPointer(window));
+    glWindow* const win = static_cast<glWindow*>( glfwGetWindowUserPointer(window) );
     if (win)
         win->setSize(width, height);
 }
 
 
 
-glWindow::glWindow(const std::string &title, int width, int height, bool fullscreen)
+glWindow::glWindow(const std::string &title, int width, int height, bool fullscreen, int gl_major, int gl_minor)
     : m_window(nullptr)
     , m_frameTimes{}
     , m_lastFrame(glfwGetTime())
@@ -21,11 +21,11 @@ glWindow::glWindow(const std::string &title, int width, int height, bool fullscr
     , m_height(height)
 {
     if (m_height == -1)
-        m_height = int( ceil(m_width * (9.0/16.0)) );
+        m_height = static_cast<int>( ceil(m_width * (9.0/16.0)) );
     
     // Using OpenGL 4.6 for direct state access
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, gl_major);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, gl_minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE,        GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
     glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);

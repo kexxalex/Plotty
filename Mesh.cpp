@@ -1,4 +1,4 @@
-#include "glMesh.hpp"
+#include "Mesh.hpp"
 
 Mesh::Mesh(Mesh &&mesh)
     : m_vaoID(mesh.m_vaoID)
@@ -37,22 +37,19 @@ Mesh::Mesh(const CSVFile &csv, const std::vector<std::pair<std::string, float>> 
         column_data.emplace_back(csv.getColumn(col.first));
     }
 
-    m_stride = uint32_t(column_data.size()) + 1;
+    m_stride = static_cast<uint32_t>( column_data.size() );
     m_length = csv.getRowCount();
-
-    const float inv_length = 1.0f / static_cast<float>(m_length);
 
     for (uint32_t r=0; r < m_length; r++)
     {
-        for (uint32_t c=0; c < column_data.size(); c++)
+        for (uint32_t c=0; c < m_stride; c++)
         {
-            const std::vector<std::string> * column = column_data[c];
+            const std::vector<std::string> * const column = column_data[c];
             if (nullptr == column)
-                m_vertices.push_back(columns[c].second);
+                m_vertices.push_back(columns[c].second); // Default value
             else
                 m_vertices.push_back(std::stof(column->at(r)));
         }
-        m_vertices.push_back(inv_length * static_cast<float>(r));
     }
 }
 
@@ -85,11 +82,11 @@ void Mesh::push()
     glEnableVertexArrayAttrib(m_vaoID, 0);
 
     // Additional information
-    for (uint32_t i=0; i < m_stride-3; i++)
+    for (uint32_t i=1; i < m_stride-2; i++)
     {
-        glVertexArrayVertexBuffer(m_vaoID, i+1, m_vboID, (i+3) * sizeof(float), m_stride*sizeof(float));
-        glVertexArrayAttribFormat(m_vaoID, i+1, 1, GL_FLOAT, GL_FALSE, 0);
-        glEnableVertexArrayAttrib(m_vaoID, i+1);
+        glVertexArrayVertexBuffer(m_vaoID, i, m_vboID, (i+2) * sizeof(float), m_stride*sizeof(float));
+        glVertexArrayAttribFormat(m_vaoID, i, 1, GL_FLOAT, GL_FALSE, 0);
+        glEnableVertexArrayAttrib(m_vaoID, i);
     }
 }
 

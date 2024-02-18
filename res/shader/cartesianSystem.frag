@@ -14,9 +14,9 @@ void main()
     else if (pos.y == 0.0 && pos.z == 0.0)
         fragColor = vec4(0.5, 0.5, 0.5, d)*d;
     else if (pos.x == 0.0)
-        fragColor = vec4(0.5, 0.0, 0.0, d)*d;
+        fragColor = vec4(0.7, 0.0, 0.0, d)*d;
     else if (pos.y == 0.0)
-        fragColor = vec4(0.0, 0.5, 0.0, d)*d;
+        fragColor = vec4(0.0, 0.7, 0.0, d)*d;
     else if (pos.z == 0.0)
-        fragColor = vec4(0.0, 0.2, 0.5, d)*d;
+        fragColor = vec4(0.0, 0.5, 0.8, d)*d;
 }

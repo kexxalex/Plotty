@@ -4,12 +4,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD 17)
 
 
-set(FILES plotty.cpp glWindow.cpp CSVReader.cpp glMesh.cpp Shader.cpp)
+set(FILES
+    plotty.cpp
+    glWindow.cpp
+    CSVReader.cpp
+    Mesh.cpp
+    SmoothCurve.cpp
+    Shader.cpp)
 
 add_executable(${PROJECT_NAME} ${FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE external/glfw/include)
 target_include_directories(${PROJECT_NAME} PRIVATE external/glew/include)
+target_include_directories(${PROJECT_NAME} PRIVATE external/glm)
 
 target_link_directories(${PROJECT_NAME}
     PRIVATE libs

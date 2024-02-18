@@ -22,7 +22,8 @@ public:
 
     void render() const;
 
-private:
+protected:
+    Mesh() = delete;
     GLuint m_vaoID;
     GLuint m_vboID;
     GLenum m_mode;

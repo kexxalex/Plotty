@@ -4,7 +4,8 @@
 #include "glWindow.hpp"
 #include <iostream>
 #include "CSVReader.hpp"
-#include "glMesh.hpp"
+#include "Mesh.hpp"
+#include "SmoothCurve.hpp"
 #include "Shader.hpp"
 //#include <glm/glm.hpp>
 //#include <glm/ext.hpp>
@@ -96,6 +97,13 @@ void run(glWindow &window)
     meshes.emplace_back(csv, columns, GL_LINE_LOOP);
     for (Mesh &mesh : meshes)
         mesh.push();
+
+    SmoothICurve curve(csv, columns, {"T", 1.0f}, false);
+
+    const glm::fvec3 delta = normalize(curve(5.0f) - curve(4.0f));
+    const glm::fvec3 tangent = curve.getTangent(4.5f);
+    std::cout << delta.x << ',' << delta.y << ',' << delta.z << '\n';
+    std::cout << tangent.x << ',' << tangent.y << ',' << tangent.z << '\n';
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0);

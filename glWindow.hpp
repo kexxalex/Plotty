@@ -10,7 +10,9 @@ constexpr double INV_N_FRAMETIMES = 1.0 / N_FRAMETIMES;
 
 class glWindow {
 public:
-    glWindow(const std::string &title="GL Window", int width=1280, int height=-1, bool fullscreen=false);
+    glWindow(const std::string &title="GL Window",
+        int width=1280, int height=-1, bool fullscreen=false,
+        int gl_major=4, int gl_minor=5);
 
     void swap() const noexcept;
     inline void makeCurrent() const noexcept { glfwMakeContextCurrent(m_window); }

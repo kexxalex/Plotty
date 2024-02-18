@@ -23,6 +23,6 @@ cp lib/libGLEW.a $ROOTDIR/libs/libGLEW.a
 cd $ROOTDIR
 clear
 
-cmake . -B build
+cmake -S . -B build
 cd build
 make
