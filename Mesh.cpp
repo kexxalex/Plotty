@@ -54,6 +54,45 @@ Mesh::Mesh(const CSVFile &csv, const std::vector<std::pair<std::string, float>> 
 }
 
 
+Mesh::Mesh(const CSVFile &csv, 
+    const std::pair<std::string, float> &T,
+    const std::pair<std::string, float> &X,
+    const std::pair<std::string, float> &Y,
+    const std::pair<std::string, float> &Z,
+    const Mesh * curve, GLenum mode)
+    : m_vaoID(0)
+    , m_vboID(0)
+    , m_mode(mode)
+    , m_stride(4)
+{
+    const auto Xcol = csv.getColumn(X.first);
+    const auto Ycol = csv.getColumn(Y.first);
+    const auto Zcol = csv.getColumn(Z.first);
+    const auto Tcol = csv.getColumn(T.first);
+    m_length = csv.getRowCount();
+
+    const float total_time = (nullptr == Tcol) ? (T.second * (m_length-1)) : std::stof(Tcol->at(m_length-1));
+    const float inv_total_time = 1.0f / total_time;
+
+    m_vertices.resize(4 * m_length);
+
+    for (uint32_t r=0; r < m_length; r++)
+    {
+        glm::fvec4 local_coords(1.0f);
+        const float t = (nullptr == Tcol) ? (T.second * r) : std::stof(Tcol->at(r));
+        local_coords.x = (nullptr == Xcol) ? X.second : std::stof(Xcol->at(r));
+        local_coords.y = (nullptr == Ycol) ? Y.second : std::stof(Ycol->at(r));
+        local_coords.z = (nullptr == Zcol) ? Z.second : std::stof(Zcol->at(r));
+
+        glm::fvec3 coords = curve->transform(t, local_coords);
+        m_vertices[r*4 + 0] = coords.x;
+        m_vertices[r*4 + 1] = coords.y;
+        m_vertices[r*4 + 2] = coords.z;
+        m_vertices[r*4 + 3] = t * inv_total_time;
+    }
+}
+
+
 Mesh::Mesh(std::vector<float> &&positions, uint32_t stride, GLenum mode)
     : m_vaoID(0)
     , m_vboID(0)

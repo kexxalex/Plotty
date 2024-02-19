@@ -12,15 +12,15 @@
 #include <glm/gtx/transform.hpp>
 
 
-static void render(glWindow &window, const glm::fmat4 &MVP, Shader &shader, const std::vector<Mesh> &meshes)
+static void render(glWindow &window, const glm::fmat4 &MVP, Shader &shader, const std::vector<Mesh*> &meshes)
 {
 
     shader.setMatrixFloat4("MVP", MVP);
     shader.Bind();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (const Mesh &mesh : meshes)
-        mesh.render();
+    for (const Mesh *mesh : meshes)
+        mesh->render();
 }
 
 
@@ -88,22 +88,30 @@ Mesh createPlane(const int S, const float spacing=1.0f)
 
 void run(glWindow &window)
 {
-    std::vector<Mesh> meshes;
-    CSVFile csv("geodesicSphere.csv");
-    if (!csv.read(','))
+    std::vector<Mesh*> meshes;
+    CSVFile circle("res/meshes/geodesicSphere.csv");
+    if (!circle.read(','))
         return;
 
-    const std::vector<std::pair<std::string, float>> columns = {{"X", 0.0f}, {"Y", 0.0f}, {"Z", 0.0f}};
-    meshes.emplace_back(csv, columns, GL_LINE_LOOP);
-    for (Mesh &mesh : meshes)
-        mesh.push();
+    CSVFile alongCurveCSV("res/meshes/sine.csv");
+    if (!alongCurveCSV.read(','))
+        return;
 
-    SmoothICurve curve(csv, columns, {"T", 64.0f}, true);
+    const std::vector<std::pair<std::string, float>> columns = {{"X", 0.0f}, {"Y", 0.0f}, {"Z", 0.0f}, {"T", 0.0f}};
 
-    const glm::fvec3 delta = normalize(curve(M_PI_4f+0.001f) - curve(M_PI_4f-0.001f));
-    const glm::fvec3 tangent = curve.getTangent(M_PI_4f);
-    std::cout << delta.x << ',' << delta.y << ',' << delta.z << '\n';
-    std::cout << tangent.x << ',' << tangent.y << ',' << tangent.z << '\n';
+    SmoothICurve curve(circle, columns, {"T", 1.0f}, true);
+    meshes.push_back(dynamic_cast<Mesh*>(&curve));
+
+    Mesh alongCurve(alongCurveCSV, {"T", 1.0f}, {"X", 0.0f}, {"Y", 0.0f}, {"Z", 0.0f},
+        dynamic_cast<Mesh*>(&curve),
+        GL_LINE_LOOP
+    );
+
+    meshes.push_back(dynamic_cast<Mesh*>(&alongCurve));
+
+    for (Mesh * mesh : meshes)
+        mesh->push();
+    
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0);
@@ -112,7 +120,7 @@ void run(glWindow &window)
 
     Shader cartesian("./res/shader/cartesian");
     Shader cartesianSystem("./res/shader/cartesianSystem");
-    Mesh cartesianSystemGrid = createPlane(16, 0.25);
+    Mesh cartesianSystemGrid = createPlane(16, 0.5);
     cartesianSystemGrid.push();
 
     constexpr glm::fvec3 up(0.0f, 1.0f, 0.0f);

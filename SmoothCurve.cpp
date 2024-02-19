@@ -28,18 +28,18 @@ SmoothICurve::SmoothICurve(const CSVFile &csv,
     if (csv.getRowCount() <= 2)
         return;
 
-    time.reserve(csv.getRowCount());
+    m_time.resize(csv.getRowCount());
     if (auto * time_col = csv.getColumn(time_and_scale.first))
     {
         // time_col exists
         t_start = std::stof(time_col->at(0)) * time_and_scale.second;
-        time.push_back(t_start);
+        m_time[0] = t_start;
 
         for (uint32_t r=1; r < csv.getRowCount()-1; r++)
-            time.push_back(std::stof(time_col->at(r)) * time_and_scale.second);
+            m_time[r] = std::stof(time_col->at(r)) * time_and_scale.second;
 
         t_end = std::stof(time_col->at(csv.getRowCount()-1)) * time_and_scale.second;
-        time.push_back(t_end);
+        m_time[csv.getRowCount()-1] = t_end;
     }
     else
     {
@@ -47,7 +47,7 @@ SmoothICurve::SmoothICurve(const CSVFile &csv,
         t_start = 0.0f;
         t_end = (csv.getRowCount()-1) * time_and_scale.second;
         for (uint32_t i=0; i < csv.getRowCount(); i++)
-            time.push_back(i * time_and_scale.second);
+            m_time[i] = i * time_and_scale.second;
     }
 
     /*
@@ -70,7 +70,7 @@ void SmoothICurve::calculateCyclicSpline()
     std::vector<float> d;
     std::vector<float> bottom;
 
-    const uint32_t n = time.size()-1;
+    const uint32_t n = m_time.size()-1;
     d.resize(n-1);
     bottom.assign(n, 0.0f);
 
@@ -78,10 +78,10 @@ void SmoothICurve::calculateCyclicSpline()
 
     spline_M.resize(n+1);
 
-    h[0] = time[1] - time[0];
+    h[0] = m_time[1] - m_time[0];
     for (uint32_t i=1; i < n; i++)
     {
-        h[i] = time[i+1] - time[i];
+        h[i] = m_time[i+1] - m_time[i];
         d[i-1] = (h[i-1] + h[i]) / 3.0f;
     }
 
@@ -122,6 +122,7 @@ void SmoothICurve::calculateCyclicSpline()
     spline_M[n] -= ratio_bot * spline_M[n-1];
 
     spline_M[n] /= bottom[n-1];
+    spline_M[0] = spline_M[n];
 
     spline_M[n-1] /= d[n-2];
     for (uint32_t i=n-2; i >= 1; i--)
@@ -140,7 +141,7 @@ void SmoothICurve::calculateNaturalSpline()
     // Representing tridiagonal symmetric momentum matrix (Diagonal)
     std::vector<float> d;
 
-    const uint32_t n = time.size()-1;
+    const uint32_t n = m_time.size()-1;
     d.resize(n-1);
 
     h.resize(n);
@@ -149,10 +150,10 @@ void SmoothICurve::calculateNaturalSpline()
     spline_M[0] = glm::fvec3(0.0f); // natural conditions, no curvature
     spline_M[n] = glm::fvec3(0.0f);
 
-    h[0] = time[1] - time[0];
+    h[0] = m_time[1] - m_time[0];
     for (uint32_t i=1; i < n; i++)
     {
-        h[i] = time[i+1] - time[i];
+        h[i] = m_time[i+1] - m_time[i];
         d[i-1] = (h[i-1] + h[i]) / 3.0f;
     }
 
@@ -180,19 +181,19 @@ void SmoothICurve::calculateNaturalSpline()
     }
 }
 
-glm::fvec3 SmoothICurve::operator()(float t) const {
+glm::fvec3 SmoothICurve::at(float t) const {
     if (!m_cyclic && (t < t_start || t > t_end))
         return glm::fvec3(0.0f);
     t = fmodf(t, t_end);
     
-    const uint32_t low = bisect(time, t);
+    const uint32_t low = bisect(m_time, t);
     const uint32_t high = low+1;
     
     const glm::fvec3 y0(m_vertices[low*m_stride], m_vertices[low*m_stride + 1], m_vertices[low*m_stride + 2]);
     const glm::fvec3 y1(m_vertices[high*m_stride], m_vertices[high*m_stride + 1], m_vertices[high*m_stride + 2]);
 
-    const float t0 = time[low];
-    const float t1 = time[high];
+    const float t0 = m_time[low];
+    const float t1 = m_time[high];
 
     const float h = t1 - t0;
     const float inv_h = 1.0f / h;
@@ -208,19 +209,19 @@ glm::fvec3 SmoothICurve::operator()(float t) const {
     return M1 * ((t-t0)*(t-t0)*(t-t0) * inv_h6) - M0 * ((t-t1)*(t-t1)*(t-t1) * inv_h6) + D*(t-t0) - C*(t-t1);
 }
 
-glm::fvec3 SmoothICurve::diff(float t) const {
+glm::fvec3 SmoothICurve::diffAt(float t) const {
     if (!m_cyclic && (t < t_start || t > t_end))
         return glm::fvec3(0.0f);
     t = fmodf(t, t_end);
     
-    const uint32_t low = bisect(time, t);
+    const uint32_t low = bisect(m_time, t);
     const uint32_t high = low+1;
     
     const glm::fvec3 y0(m_vertices[low*m_stride], m_vertices[low*m_stride + 1], m_vertices[low*m_stride + 2]);
     const glm::fvec3 y1(m_vertices[high*m_stride], m_vertices[high*m_stride + 1], m_vertices[high*m_stride + 2]);
 
-    const float t0 = time[low];
-    const float t1 = time[high];
+    const float t0 = m_time[low];
+    const float t1 = m_time[high];
 
     const float h = t1 - t0;
     const float inv_h = 1.0f / h;
@@ -236,16 +237,16 @@ glm::fvec3 SmoothICurve::diff(float t) const {
     return M1 * ((t-t0)*(t-t0) * inv_h2) - M0 * ((t-t1)*(t-t1) * inv_h2) + D - C;
 }
 
-glm::fvec3 SmoothICurve::diff2(float t) const {
+glm::fvec3 SmoothICurve::diff2At(float t) const {
     if (!m_cyclic && (t < t_start || t > t_end))
         return glm::fvec3(0.0f);
     t = fmodf(t, t_end);
     
-    const uint32_t low = bisect(time, t);
+    const uint32_t low = bisect(m_time, t);
     const uint32_t high = low+1;
 
-    const float t0 = time[low];
-    const float t1 = time[high];
+    const float t0 = m_time[low];
+    const float t1 = m_time[high];
 
     const float h = t1 - t0;
     const float inv_h = 1.0f / h;
@@ -265,14 +266,14 @@ void SmoothICurve::diffs(float t, glm::fvec3 &T, glm::fvec3 &N) const {
     }
     t = fmodf(t, t_end);
     
-    const uint32_t low = bisect(time, t);
+    const uint32_t low = bisect(m_time, t);
     const uint32_t high = low+1;
     
     const glm::fvec3 y0(m_vertices[low*m_stride], m_vertices[low*m_stride + 1], m_vertices[low*m_stride + 2]);
     const glm::fvec3 y1(m_vertices[high*m_stride], m_vertices[high*m_stride + 1], m_vertices[high*m_stride + 2]);
 
-    const float t0 = time[low];
-    const float t1 = time[high];
+    const float t0 = m_time[low];
+    const float t1 = m_time[high];
 
     const float h = t1 - t0;
     const float inv_h = 1.0f / h;
@@ -293,7 +294,7 @@ glm::fvec3 SmoothICurve::getTangent(float t) const {
         return glm::fvec3(0.0f);
     t = fmodf(t, t_end);
     
-    return glm::normalize(diff(t));
+    return glm::normalize(diffAt(t));
 }
 
 glm::fvec3 SmoothICurve::getNormal(float t) const {
@@ -301,7 +302,7 @@ glm::fvec3 SmoothICurve::getNormal(float t) const {
         return glm::fvec3(0.0f);
     t = fmodf(t, t_end);
     
-    return glm::normalize(diff2(t));
+    return glm::normalize(diff2At(t));
 }
 
 glm::fvec3 SmoothICurve::getBinormal(float t) const {
@@ -311,19 +312,52 @@ glm::fvec3 SmoothICurve::getBinormal(float t) const {
     
     glm::fvec3 T, N;
     diffs(t, T, N);
+    N -= glm::dot(T, N)*T;
+    N = glm::normalize(N);
     return glm::normalize(glm::cross(T, N));
 }
 
-glm::fmat3 SmoothICurve::getTNB(float t) const {
+glm::fmat4 SmoothICurve::getOrthonormalFrame(float t) const {
     if (!m_cyclic && (t < t_start || t > t_end))
-        return glm::fmat3(1.0f);
+        return glm::fmat4(1.0f);
     t = fmodf(t, t_end);
     
-    glm::fvec3 T, N;
-    diffs(t, T, N);
-    T = glm::normalize(T);
-    N = glm::normalize(N);
-    glm::fvec3 B = glm::cross(T, N);
+    const uint32_t low = bisect(m_time, t);
+    const uint32_t high = low+1;
+    
+    const glm::fvec3 y0(m_vertices[low*m_stride], m_vertices[low*m_stride + 1], m_vertices[low*m_stride + 2]);
+    const glm::fvec3 y1(m_vertices[high*m_stride], m_vertices[high*m_stride + 1], m_vertices[high*m_stride + 2]);
 
-    return glm::fmat3(T, N, B);
+    const float t0 = m_time[low];
+    const float t1 = m_time[high];
+
+    const float h = t1 - t0;
+    const float inv_h = 1.0f / h;
+    const float inv_h6 = inv_h / 6.0f;
+    const float inv_h2 = inv_h * 0.5f;
+
+    const glm::fvec3 &M0 = spline_M[low];
+    const glm::fvec3 &M1 = spline_M[high];
+
+    const glm::fvec3 C = y0*inv_h - M0*(h/6.0f);
+    const glm::fvec3 D = y1*inv_h - M1*(h/6.0f);
+
+    const glm::fvec3 P = M1 * ((t-t0)*(t-t0)*(t-t0) * inv_h6) - M0 * ((t-t1)*(t-t1)*(t-t1) * inv_h6) + D*(t-t0) - C*(t-t1);
+    const glm::fvec3 T = glm::normalize(M1 * ((t-t0)*(t-t0) * inv_h2) - M0 * ((t-t1)*(t-t1) * inv_h2) + D - C);
+    glm::fvec3 N = M1 * ((t-t0) * inv_h) - M0 * ((t-t1) * inv_h);
+    N -= glm::dot(T, N)*T;
+    N = glm::normalize(N);
+    const glm::fvec3 B = glm::normalize(glm::cross(T, N));
+
+    return glm::fmat4(
+        glm::fvec4(T, 0.0f),
+        glm::fvec4(N, 0.0f),
+        glm::fvec4(B, 0.0f),
+        glm::fvec4(P, 1.0f)
+    );
+}
+
+glm::fvec4 SmoothICurve::transform(float t, const glm::fvec4 &direction) const {
+    glm::fmat4 M = getOrthonormalFrame(t);
+    return M * direction;
 }
