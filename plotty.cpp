@@ -98,10 +98,10 @@ void run(glWindow &window)
     for (Mesh &mesh : meshes)
         mesh.push();
 
-    SmoothICurve curve(csv, columns, {"T", 1.0f}, false);
+    SmoothICurve curve(csv, columns, {"T", 64.0f}, true);
 
-    const glm::fvec3 delta = normalize(curve(5.0f) - curve(4.0f));
-    const glm::fvec3 tangent = curve.getTangent(4.5f);
+    const glm::fvec3 delta = normalize(curve(M_PI_4f+0.001f) - curve(M_PI_4f-0.001f));
+    const glm::fvec3 tangent = curve.getTangent(M_PI_4f);
     std::cout << delta.x << ',' << delta.y << ',' << delta.z << '\n';
     std::cout << tangent.x << ',' << tangent.y << ',' << tangent.z << '\n';
 
