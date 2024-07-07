@@ -1,31 +1,32 @@
 #pragma once
 
+#include "defines.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <cinttypes>
 #include <iostream>
 
 
-using StringTabular = std::vector< std::vector<std::string> >;
+using StringTabular = std::vector<std::vector<std::string>>;
 
-class CSVFile
-{
+class CSVFile {
 public:
-    CSVFile(const std::string &filename);
+    explicit CSVFile( const std::string &filename );
 
-    bool read(const char separator = ',');
+    bool read( char separator = ',' );
 
-    const std::vector<std::string> * getColumn(const std::string &name) const noexcept;
-    uint32_t getColCount() const noexcept;
-    constexpr uint32_t getRowCount() const noexcept { return m_rows; }
+    const std::vector<std::string> *getColumn( const std::string &name ) const noexcept;
+
+    u32 getColCount() const noexcept;
+
+    constexpr u32 getRowCount() const noexcept { return m_rows; }
 
 protected:
     std::string m_filename;
-    std::unordered_map<std::string, uint32_t> m_header;
+    std::unordered_map<std::string, u32> m_header;
     StringTabular m_values;
 
-    uint32_t m_rows;
+    u32 m_rows;
 
     bool m_isOk;
     bool m_hasData;

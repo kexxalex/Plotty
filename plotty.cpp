@@ -12,9 +12,8 @@
 #include <glm/gtx/transform.hpp>
 
 
-static void render(glWindow &window, const glm::fmat4 &MVP, Shader &shader, const std::vector<Mesh*> &meshes)
+static void render( glWindow &window, const glm::fmat4 &MVP, Shader &shader, const std::vector<Mesh *> &meshes )
 {
-
     shader.setMatrixFloat4("MVP", MVP);
     shader.Bind();
 
@@ -24,94 +23,93 @@ static void render(glWindow &window, const glm::fmat4 &MVP, Shader &shader, cons
 }
 
 
-
-Mesh createPlane(const int S, const float spacing=1.0f)
+Mesh createGridPlane( const int S, const float spacing = 1.0f )
 {
     std::vector<float> vertices;
-    for (int i=-S; i < S; i++)
-    {
-        vertices.push_back(i*spacing);
+    for (int i = -S; i < S; i++) {
+        vertices.push_back(i * spacing);
         vertices.push_back(0.0f);
-        vertices.push_back(-S*spacing);
+        vertices.push_back(-S * spacing);
 
-        vertices.push_back(i*spacing);
+        vertices.push_back(i * spacing);
         vertices.push_back(0.0f);
-        vertices.push_back(S*spacing);
+        vertices.push_back(S * spacing);
 
-        vertices.push_back(-S*spacing);
+        vertices.push_back(-S * spacing);
         vertices.push_back(0.0f);
-        vertices.push_back(i*spacing);
+        vertices.push_back(i * spacing);
 
-        vertices.push_back(S*spacing);
+        vertices.push_back(S * spacing);
         vertices.push_back(0.0f);
-        vertices.push_back(i*spacing);
+        vertices.push_back(i * spacing);
 
 
-        vertices.push_back(i*spacing);
-        vertices.push_back(-S*spacing);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(i*spacing);
-        vertices.push_back(S*spacing);
+        vertices.push_back(i * spacing);
+        vertices.push_back(-S * spacing);
         vertices.push_back(0.0f);
 
-        vertices.push_back(-S*spacing);
-        vertices.push_back(i*spacing);
+        vertices.push_back(i * spacing);
+        vertices.push_back(S * spacing);
         vertices.push_back(0.0f);
 
-        vertices.push_back(S*spacing);
-        vertices.push_back(i*spacing);
+        vertices.push_back(-S * spacing);
+        vertices.push_back(i * spacing);
+        vertices.push_back(0.0f);
+
+        vertices.push_back(S * spacing);
+        vertices.push_back(i * spacing);
         vertices.push_back(0.0f);
 
 
         vertices.push_back(0.0f);
-        vertices.push_back(i*spacing);
-        vertices.push_back(-S*spacing);
+        vertices.push_back(i * spacing);
+        vertices.push_back(-S * spacing);
 
         vertices.push_back(0.0f);
-        vertices.push_back(i*spacing);
-        vertices.push_back(S*spacing);
+        vertices.push_back(i * spacing);
+        vertices.push_back(S * spacing);
 
         vertices.push_back(0.0f);
-        vertices.push_back(-S*spacing);
-        vertices.push_back(i*spacing);
+        vertices.push_back(-S * spacing);
+        vertices.push_back(i * spacing);
 
         vertices.push_back(0.0f);
-        vertices.push_back(S*spacing);
-        vertices.push_back(i*spacing);
+        vertices.push_back(S * spacing);
+        vertices.push_back(i * spacing);
     }
 
-    return Mesh(std::move(vertices), 3, GL_LINES);
+    return {std::move(vertices), 3, GL_LINES};
 }
 
 
-
-void run(glWindow &window)
+void run( glWindow &window )
 {
-    std::vector<Mesh*> meshes;
-    CSVFile circle("res/meshes/geodesicSphere.csv");
-    if (!circle.read(','))
+    std::vector<Mesh *> meshes;
+    CSVFile circleCSV("res/meshes/geodesicSphere.csv");
+    if (!circleCSV.read(','))
         return;
 
-    CSVFile alongCurveCSV("res/meshes/sine.csv");
-    if (!alongCurveCSV.read(','))
+    CSVFile spiralCSV("res/meshes/spiral.csv");
+    if (!spiralCSV.read(','))
         return;
 
-    const std::vector<std::pair<std::string, float>> columns = {{"X", 0.0f}, {"Y", 0.0f}, {"Z", 0.0f}, {"T", 0.0f}};
+    CSVFile onfCSV("res/meshes/ONF.csv");
+    if (!onfCSV.read(','))
+        return;
 
-    SmoothICurve curve(circle, columns, {"T", 1.0f}, true);
-    meshes.push_back(dynamic_cast<Mesh*>(&curve));
+    const std::vector<std::pair<std::string, float>> columns = { { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, { "T", 0.0f } };
 
-    Mesh alongCurve(alongCurveCSV, {"T", 1.0f}, {"X", 0.0f}, {"Y", 0.0f}, {"Z", 0.0f},
-        dynamic_cast<Mesh*>(&curve),
-        GL_LINE_LOOP
-    );
+    SmoothICurve circle(circleCSV, columns, { "T", 1.0f }, true);
+    //meshes.push_back(&circle);
 
-    meshes.push_back(dynamic_cast<Mesh*>(&alongCurve));
+    SmoothICurve spiral(spiralCSV, columns, { "T", 1.0f }, &circle, true);
+    meshes.push_back(&spiral);
 
-    for (Mesh * mesh : meshes)
+    Mesh tbnSpiral(onfCSV, { "T", 0.0f }, { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, &spiral, GL_LINES);
+    meshes.push_back(&tbnSpiral);
+
+    for (Mesh *const mesh : meshes)
         mesh->push();
-    
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0);
@@ -120,7 +118,7 @@ void run(glWindow &window)
 
     Shader cartesian("./res/shader/cartesian");
     Shader cartesianSystem("./res/shader/cartesianSystem");
-    Mesh cartesianSystemGrid = createPlane(16, 0.5);
+    Mesh cartesianSystemGrid = createGridPlane(16, 0.5f);
     cartesianSystemGrid.push();
 
     constexpr glm::fvec3 up(0.0f, 1.0f, 0.0f);
@@ -130,13 +128,12 @@ void run(glWindow &window)
     glm::dvec2 lastPosition;
     bool leftClick = false;
 
-    GLFWwindow * const winPtr = window.getPointer();
+    GLFWwindow *const winPtr = window.getPointer();
 
-    while (!window.shouldClose())
-    {
+    while (!window.shouldClose()) {
         const glm::dmat4 proj = glm::perspectiveFov<double>(glm::radians(45.0), window.getWidth(), window.getHeight(), 0.03, 1024.0);
-        constexpr glm::dvec3 X = {1.0f, 0.0f, 0.0f};
-        constexpr glm::dvec3 Y = {0.0f, 1.0f, 0.0f};
+        constexpr glm::dvec3 X = { 1.0f, 0.0f, 0.0f };
+        constexpr glm::dvec3 Y = { 0.0f, 1.0f, 0.0f };
 
         position.x = sin(glfwGetTime() * 0.125) * M_SQRT1_2 * 3.0;
         position.y = M_SQRT1_2 * 3.0;
@@ -159,16 +156,14 @@ void run(glWindow &window)
 
 int main()
 {
-    if (!glfwInit())
-    {
+    if (glfwInit() != GLFW_TRUE) {
         std::cerr << "Could not initialize GLFW" << std::endl;
         return 1;
     }
 
-    glWindow window("Test");
+    glWindow window("Test", 1280, 720, false, 4, 6);
 
-    if (glewInit() != GLEW_OK)
-    {
+    if (glewInit() != GLEW_OK) {
         std::cerr << "Could not initialize GLEW" << std::endl;
         glfwTerminate();
         return 2;
@@ -182,6 +177,3 @@ int main()
 
     return 0;
 }
-
-
-

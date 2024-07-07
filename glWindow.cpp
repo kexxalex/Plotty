@@ -3,33 +3,32 @@
 #include <stdexcept>
 #include <iostream>
 
-static void sizeCallback(GLFWwindow* window, int width, int height)
+static void sizeCallback( GLFWwindow *window, int width, int height )
 {
-    glWindow* const win = static_cast<glWindow*>( glfwGetWindowUserPointer(window) );
+    glWindow *const win = static_cast<glWindow *>(glfwGetWindowUserPointer(window));
     if (win)
         win->setSize(width, height);
 }
 
 
-
-glWindow::glWindow(const std::string &title, int width, int height, bool fullscreen, int gl_major, int gl_minor)
+glWindow::glWindow( const std::string &title, int width, int height, bool fullscreen, int gl_major, int gl_minor )
     : m_window(nullptr)
-    , m_frameTimes{}
+    , m_frameTimes{ }
     , m_lastFrame(glfwGetTime())
     , m_frameTimeIndex(0)
     , m_width(width)
     , m_height(height)
 {
     if (m_height == -1)
-        m_height = static_cast<int>( ceil(m_width * (9.0/16.0)) );
-    
-    // Using OpenGL 4.6 for direct state access
+        m_height = static_cast<int>(ceil(m_width * (9.0 / 16.0)));
+
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, gl_major);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, gl_minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE,        GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-    glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+
 #ifdef DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
@@ -40,16 +39,17 @@ glWindow::glWindow(const std::string &title, int width, int height, bool fullscr
     glfwWindowHint(GLFW_BLUE_BITS, 10);
     glfwWindowHint(GLFW_ALPHA_BITS, 2);
 
-    GLFWmonitor* const monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
+    GLFWmonitor *const monitor = fullscreen ? glfwGetPrimaryMonitor() : nullptr;
 
     m_window = glfwCreateWindow(m_width, m_height, title.c_str(), monitor, nullptr);
 
-    if (nullptr == m_window)
-    {
-        throw std::runtime_error( "GLFW Window could not be created" );
+    if (nullptr == m_window) {
+        throw std::runtime_error("GLFW Window could not be created");
     }
 
     makeCurrent();
+
+    std::cout << "GL context version: " << gl_major << '.' << glGetString(GL_VERSION) << '\n';
 
     glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, m_width, m_height);
@@ -57,7 +57,6 @@ glWindow::glWindow(const std::string &title, int width, int height, bool fullscr
 
     glfwSetFramebufferSizeCallback(m_window, sizeCallback);
 }
-
 
 
 void glWindow::swap() const noexcept
@@ -71,17 +70,17 @@ void glWindow::swap() const noexcept
 }
 
 
-void glWindow::setWidth(int width)
+void glWindow::setWidth( const int width )
 {
     setSize(width, m_height);
 }
 
-void glWindow::setHeight(int height)
+void glWindow::setHeight( const int height )
 {
     setSize(m_width, height);
 }
 
-void glWindow::setSize(int width, int height)
+void glWindow::setSize( const int width, const int height )
 {
     m_width = width;
     m_height = height;

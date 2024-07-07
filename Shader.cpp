@@ -5,7 +5,8 @@
 #include <sstream>
 
 
-bool loadShaderProgram(const std::string& filename, GLint shaderType, GLuint &shaderID) {
+bool loadShaderProgram( const std::string &filename, GLint shaderType, GLuint &shaderID )
+{
     std::string sourceCode;
     std::ifstream shaderFile(filename);
 
@@ -16,7 +17,8 @@ bool loadShaderProgram(const std::string& filename, GLint shaderType, GLuint &sh
         shaderFile.close();
 
         sourceCode = sourceStringStream.str();
-    } else {
+    }
+    else {
         return false;
     }
 
@@ -40,15 +42,22 @@ bool loadShaderProgram(const std::string& filename, GLint shaderType, GLuint &sh
 }
 
 
-
-
-Shader::Shader(std::string_view shaderPath)
-        : m_shaderName(shaderPath)
+Shader::Shader( const std::string &shaderPath )
+    : m_shaderName(shaderPath)
 {
     Load();
 }
 
-bool Shader::Reload() noexcept {
+Shader &Shader::operator=( Shader &&shader ) noexcept
+{
+    m_programID = shader.m_programID;
+    m_uniforms = std::move(shader.m_uniforms);
+    m_shaderName = std::move(shader.m_shaderName);
+    return *this;
+}
+
+bool Shader::Reload()
+{
     if (m_programID != 0) {
         glUseProgram(0);
         glDeleteProgram(m_programID);
@@ -58,11 +67,12 @@ bool Shader::Reload() noexcept {
     return Load();
 }
 
-bool Shader::Load() noexcept {
+bool Shader::Load()
+{
     std::cout << "[  INFO  ][Shader ] Create Shader: " << m_shaderName << " - ";
 
     GLuint vertexID(0), fragmentID(0), geometryID(0), computeID(0);
-    bool hasVertex   = loadShaderProgram(m_shaderName + ".vert", GL_VERTEX_SHADER, vertexID);
+    bool hasVertex = loadShaderProgram(m_shaderName + ".vert", GL_VERTEX_SHADER, vertexID);
     bool hasFragment = loadShaderProgram(m_shaderName + ".frag", GL_FRAGMENT_SHADER, fragmentID);
     bool hasGeometry = loadShaderProgram(m_shaderName + ".geom", GL_GEOMETRY_SHADER, geometryID);
     bool hasCompute = loadShaderProgram(m_shaderName + ".comp", GL_COMPUTE_SHADER, computeID);
@@ -108,87 +118,104 @@ bool Shader::Load() noexcept {
     return true;
 }
 
-void Shader::setBool(std::string_view name, bool value) noexcept {
+void Shader::setBool( const std::string &name, bool value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform1i(m_programID, m_uniforms[name], int(value));
 }
 
-void Shader::setInt(std::string_view name, int value) noexcept {
+void Shader::setInt( const std::string &name, int value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform1i(m_programID, m_uniforms[name], value);
 }
 
-void Shader::setUInt(std::string_view name, unsigned int value) noexcept {
+void Shader::setUInt( const std::string &name, unsigned int value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform1ui(m_programID, m_uniforms[name], value);
 }
 
-void Shader::setFloat(std::string_view name, float value) noexcept {
+void Shader::setFloat( const std::string &name, float value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform1f(m_programID, m_uniforms[name], value);
 }
 
-void Shader::setDouble(std::string_view name, double value) noexcept {
+void Shader::setDouble( const std::string &name, double value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform1d(m_programID, m_uniforms[name], value);
 }
 
-void Shader::setFloat2(std::string_view name, const glm::fvec2 &value) noexcept {
+void Shader::setFloat2( const std::string &name, const glm::fvec2 &value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform2fv(m_programID, m_uniforms[name], 1, &value.x);
 }
 
-void Shader::setFloat3(std::string_view name, const glm::fvec3 &value) noexcept {
+void Shader::setFloat3( const std::string &name, const glm::fvec3 &value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform3fv(m_programID, m_uniforms[name], 1, &value.x);
 }
 
-void Shader::setFloat4(std::string_view name, const glm::fvec4 &value) noexcept {
+void Shader::setFloat4( const std::string &name, const glm::fvec4 &value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform4fv(m_programID, m_uniforms[name], 1, &value.x);
 }
 
-void Shader::setDouble2(std::string_view name, const glm::dvec2 &value) noexcept {
+void Shader::setDouble2( const std::string &name, const glm::dvec2 &value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform2dv(m_programID, m_uniforms[name], 1, &value.x);
 }
 
-void Shader::setDouble3(std::string_view name, const glm::dvec3 &value) noexcept {
+void Shader::setDouble3( const std::string &name, const glm::dvec3 &value )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniform3dv(m_programID, m_uniforms[name], 1, &value.x);
 }
 
-void Shader::setMatrixFloat4(std::string_view name, const glm::fmat4 &matrix) noexcept {
+void Shader::setMatrixFloat4( const std::string &name, const glm::fmat4 &matrix )
+{
     if (m_uniforms.find(name) == m_uniforms.end())
         m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
 
     glProgramUniformMatrix4fv(m_programID, m_uniforms[name], 1, GL_FALSE, &matrix[0].x);
 }
 
-Shader::~Shader() {
+Shader::~Shader()
+{
     std::cout << "[  INFO  ][Shader ] Delete Shader: " << m_shaderName << '(' << m_programID << ')' << std::endl;
 
     glUseProgram(0);
     glDeleteProgram(m_programID);
     m_uniforms.clear();
+}
+
+void Shader::Bind() const
+{
+    glUseProgram(m_programID);
 }

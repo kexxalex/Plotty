@@ -5,30 +5,28 @@
 #include <filesystem>
 
 
-static std::vector<std::string> readCSVLine(const std::string &line, const char sep)
+static std::vector<std::string> readCSVLine( const std::string &line, const char sep )
 {
     std::vector<std::string> splitLineData;
 
     std::stringstream line_ss(line);
     std::string data;
 
-    while (std::getline(line_ss, data, sep))
-    {
+    while (std::getline(line_ss, data, sep)) {
         splitLineData.push_back(data);
     }
 
     return splitLineData;
 }
 
-static std::vector<std::string> readCSVLine(const std::string &line, const char sep, const uint32_t columns)
+static std::vector<std::string> readCSVLine( const std::string &line, const char sep, const u32 columns )
 {
     std::vector<std::string> splitLineData(columns);
 
     std::stringstream line_ss(line);
     std::string data;
 
-    for(uint32_t i=0; i < columns; i++)
-    {
+    for (u32 i = 0; i < columns; i++) {
         if (std::getline(line_ss, data, sep))
             splitLineData[i] = data;
     }
@@ -37,11 +35,12 @@ static std::vector<std::string> readCSVLine(const std::string &line, const char 
 }
 
 
-uint32_t CSVFile::getColCount() const noexcept { return uint32_t(m_header.size()); }
+u32 CSVFile::getColCount() const noexcept { return static_cast<u32>(m_header.size()); }
 
 
-CSVFile::CSVFile(const std::string &filename)
+CSVFile::CSVFile( const std::string &filename )
     : m_filename(filename)
+    , m_rows(0)
     , m_hasData(false)
 {
     m_isOk = std::filesystem::is_regular_file(filename);
@@ -49,14 +48,13 @@ CSVFile::CSVFile(const std::string &filename)
         std::cerr << "File \"" << m_filename << "\" does not exist." << std::endl;
 }
 
-bool CSVFile::read(const char separator)
+bool CSVFile::read( const char separator )
 {
     if (!m_isOk)
         return false;
 
     std::ifstream f(m_filename);
-    if (!f)
-    {
+    if (!f) {
         std::cerr << "Cannot read file \"" << m_filename << "\"" << std::endl;
         return false;
     }
@@ -65,21 +63,18 @@ bool CSVFile::read(const char separator)
     std::getline(f, headerLine);
     std::vector<std::string> headers = readCSVLine(headerLine, separator);
 
-    const uint32_t columns = uint32_t(headers.size());
-    m_values.reserve(columns);
-    for (uint32_t i=0; i < columns; i++)
-    {
+    const u32 columnCount = static_cast<u32>(headers.size());
+    m_values.reserve(columnCount);
+    for (u32 i = 0; i < columnCount; i++) {
         m_header[headers[i]] = i;
         m_values.emplace_back(0);
     }
 
     std::string line;
     m_rows = 0;
-    while (std::getline(f, line))
-    {
-        uint32_t i=0;
-        for (const std::string &entry : readCSVLine(line, separator, columns))
-        {
+    while (std::getline(f, line)) {
+        u32 i = 0;
+        for (const std::string &entry : readCSVLine(line, separator, columnCount)) {
             m_values[i].push_back(entry);
             i++;
         }
@@ -93,13 +88,12 @@ bool CSVFile::read(const char separator)
 }
 
 
-const std::vector<std::string> * CSVFile::getColumn(const std::string &name) const noexcept
+const std::vector<std::string> *CSVFile::getColumn( const std::string &name ) const noexcept
 {
-    if (m_header.find(name) == m_header.cend())
-    {
+    if (!m_header.contains(name)) {
         std::cerr << "No column <" << name << "> in file \"" << m_filename << "\"" << std::endl;
         return nullptr;
     }
-    
+
     return &m_values[m_header.at(name)];
 }
