@@ -8,11 +8,3 @@ Plot along tangent space of another Mesh which is interpolated by cubic splines.
 ## Example Screenshot
 Sine curve along a geodesic of a sphere
 ![Sine curve along a geodesic of a sphere](https://github.com/kexxalex/Plotty/blob/main/Plotty.png)
-
-## Build
-
-    $ ./build.sh
-
-## Run
-
-    $ ./plotty
