@@ -12,7 +12,7 @@ public:
      * @param csv a CSVFile for the coordinates
      * @param columns for drawing. First three are used as space and 4th as time coordinates
      * @param time_and_scale time column or delta-t
-     * @param cyclic
+     * @param cyclic (default false)
      */
     SmoothICurve( const CSVFile &csv,
                   const std::vector<std::pair<std::string, f32>> &columns,
@@ -22,15 +22,19 @@ public:
     /**
      * Creates a 3D spline curve along <mesh>.
      * @param csv a CSVFile for the coordinates
-     * @param columns for drawing. First three are used as space and 4th as time coordinates
-     * @param time_and_scale time column or delta-t
+     * @param T time column and its scaling or uniform delta_t
+     * @param X x coord or default x value
+     * @param Y y coord or default y value
+     * @param Z z coord or default z value
      * @param mesh transform to its local orthonormal frame
-     * @param cyclic
+     * @param cyclic (default false)
      */
     SmoothICurve( const CSVFile &csv,
-                  const std::vector<std::pair<std::string, f32>> &columns,
-                  const std::pair<std::string, f32> &time_and_scale,
-                  const Mesh * mesh,
+                  const std::pair<std::string, f32> &T,
+                  const std::pair<std::string, f32> &X,
+                  const std::pair<std::string, f32> &Y,
+                  const std::pair<std::string, f32> &Z,
+                  const Mesh *mesh,
                   bool cyclic = false );
 
 
@@ -44,22 +48,22 @@ public:
     /**
     * Evaluates the first derivative of the curve at the given time.
     * @param t time
-    * @return position
+    * @return velocity
     */
     glm::fvec3 diffAt( f32 t ) const override;
 
     /**
     * Evaluates the second derivative of the curve at the given time.
     * @param t time
-    * @return velocity
+    * @return acceleration
     */
     glm::fvec3 diff2At( f32 t ) const override;
 
     /**
     * Evaluates the first and second derivative of the curve at the given time.
     * @param t time
-    * @param T reference of the Tangent
-    * @param N reference of the Normal
+    * @param T reference for normalized Tangent
+    * @param N reference for normalized Normal
     */
     void diffs( f32 t, glm::fvec3 &T, glm::fvec3 &N ) const;
 
@@ -101,8 +105,9 @@ public:
     glm::fvec4 transform( const glm::fvec2 &uv, const glm::fvec4 &direction ) const override { return transform(uv.x, direction); }
 
 protected:
-    void calculateCyclicSpline();
+    void generateTime( const CSVFile &csv, const std::pair<std::string, f32> &T );
 
+    void calculateCyclicSpline();
     void calculateNaturalSpline();
 
     std::vector<f32> m_time;

@@ -3,7 +3,6 @@
 
 #include <GLFW/glfw3.h>
 #include <string>
-#include <glm/glm.hpp>
 
 constexpr uint32_t N_FRAMETIMES = 4;
 constexpr double INV_N_FRAMETIMES = 1.0 / N_FRAMETIMES;

@@ -69,15 +69,13 @@ bool Shader::Reload()
 
 bool Shader::Load()
 {
-    std::cout << "[  INFO  ][Shader ] Create Shader: " << m_shaderName << " - ";
+    std::cout << "[  INFO  ][Shader ] Create Shader: " << m_shaderName << '\n';
 
     GLuint vertexID(0), fragmentID(0), geometryID(0), computeID(0);
     bool hasVertex = loadShaderProgram(m_shaderName + ".vert", GL_VERTEX_SHADER, vertexID);
     bool hasFragment = loadShaderProgram(m_shaderName + ".frag", GL_FRAGMENT_SHADER, fragmentID);
     bool hasGeometry = loadShaderProgram(m_shaderName + ".geom", GL_GEOMETRY_SHADER, geometryID);
     bool hasCompute = loadShaderProgram(m_shaderName + ".comp", GL_COMPUTE_SHADER, computeID);
-
-    std::cout << '\n';
 
     // no shader source found
     if (!hasVertex && !hasFragment && !hasGeometry && !hasCompute)
@@ -118,92 +116,66 @@ bool Shader::Load()
     return true;
 }
 
-void Shader::setBool( const std::string &name, bool value )
+void Shader::setBool( const std::string &name, const bool value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform1i(m_programID, m_uniforms[name], int(value));
+    glProgramUniform1i(m_programID, getUniformLocation(name), static_cast<int>(value));
 }
 
-void Shader::setInt( const std::string &name, int value )
+void Shader::setInt( const std::string &name, const i32 value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform1i(m_programID, m_uniforms[name], value);
+    glProgramUniform1i(m_programID, getUniformLocation(name), value);
 }
 
-void Shader::setUInt( const std::string &name, unsigned int value )
+void Shader::setUInt( const std::string &name, const u32 value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform1ui(m_programID, m_uniforms[name], value);
+    glProgramUniform1ui(m_programID, getUniformLocation(name), value);
 }
 
-void Shader::setFloat( const std::string &name, float value )
+void Shader::setFloat( const std::string &name, const f32 value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform1f(m_programID, m_uniforms[name], value);
+    glProgramUniform1f(m_programID, getUniformLocation(name), value);
 }
 
-void Shader::setDouble( const std::string &name, double value )
+void Shader::setDouble( const std::string &name, const f64 value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform1d(m_programID, m_uniforms[name], value);
+    glProgramUniform1d(m_programID, getUniformLocation(name), value);
 }
 
 void Shader::setFloat2( const std::string &name, const glm::fvec2 &value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform2fv(m_programID, m_uniforms[name], 1, &value.x);
+    glProgramUniform2fv(m_programID, getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setFloat3( const std::string &name, const glm::fvec3 &value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform3fv(m_programID, m_uniforms[name], 1, &value.x);
+    glProgramUniform3fv(m_programID, getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setFloat4( const std::string &name, const glm::fvec4 &value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform4fv(m_programID, m_uniforms[name], 1, &value.x);
+    glProgramUniform4fv(m_programID, getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setDouble2( const std::string &name, const glm::dvec2 &value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform2dv(m_programID, m_uniforms[name], 1, &value.x);
+    glProgramUniform2dv(m_programID, getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setDouble3( const std::string &name, const glm::dvec3 &value )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
-
-    glProgramUniform3dv(m_programID, m_uniforms[name], 1, &value.x);
+    glProgramUniform3dv(m_programID, getUniformLocation(name), 1, &value.x);
 }
 
 void Shader::setMatrixFloat4( const std::string &name, const glm::fmat4 &matrix )
 {
-    if (m_uniforms.find(name) == m_uniforms.end())
-        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
+    glProgramUniformMatrix4fv(m_programID, getUniformLocation(name), 1, GL_FALSE, &matrix[0].x);
+}
 
-    glProgramUniformMatrix4fv(m_programID, m_uniforms[name], 1, GL_FALSE, &matrix[0].x);
+GLint Shader::getUniformLocation( const std::string &name )
+{
+    if (!m_uniforms.contains(name))
+        m_uniforms[name] = glGetUniformLocation(m_programID, name.data());
+    return m_uniforms[name];
 }
 
 Shader::~Shader()

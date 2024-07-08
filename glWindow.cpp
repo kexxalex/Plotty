@@ -27,6 +27,7 @@ glWindow::glWindow( const std::string &title, int width, int height, bool fullsc
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, gl_minor);
     glfwWindowHint(GLFW_OPENGL_PROFILE,        GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_SAMPLES, 8);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
 #ifdef DEBUG

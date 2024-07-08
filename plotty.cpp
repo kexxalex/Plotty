@@ -17,15 +17,14 @@ static void render( glWindow &window, const glm::fmat4 &MVP, Shader &shader, con
     shader.setMatrixFloat4("MVP", MVP);
     shader.Bind();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (const Mesh *mesh : meshes)
         mesh->render();
 }
 
 
-Mesh createGridPlane( const int S, const float spacing = 1.0f )
+Mesh createGridPlane( const int S, const f32 spacing = 1.0f )
 {
-    std::vector<float> vertices;
+    std::vector<f32> vertices;
     for (int i = -S; i < S; i++) {
         vertices.push_back(i * spacing);
         vertices.push_back(0.0f);
@@ -97,15 +96,15 @@ void run( glWindow &window )
     if (!onfCSV.read(','))
         return;
 
-    const std::vector<std::pair<std::string, float>> columns = { { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, { "T", 0.0f } };
+    const std::vector<std::pair<std::string, f32>> columns = { { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, { "T", 1.0f } };
 
     SmoothICurve circle(circleCSV, columns, { "T", 1.0f }, true);
-    //meshes.push_back(&circle);
+    meshes.push_back(&circle);
 
-    SmoothICurve spiral(spiralCSV, columns, { "T", 1.0f }, &circle, true);
+    SmoothICurve spiral(spiralCSV, { "T", 1.0f }, { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, &circle, true);
     meshes.push_back(&spiral);
 
-    Mesh tbnSpiral(onfCSV, { "T", 0.0f }, { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, &spiral, GL_LINES);
+    Mesh tbnSpiral(onfCSV, { "T", 1.0f }, { "X", 0.0f }, { "Y", 0.0f }, { "Z", 0.0f }, &spiral, GL_LINES);
     meshes.push_back(&tbnSpiral);
 
     for (Mesh *const mesh : meshes)
@@ -118,7 +117,7 @@ void run( glWindow &window )
 
     Shader cartesian("./res/shader/cartesian");
     Shader cartesianSystem("./res/shader/cartesianSystem");
-    Mesh cartesianSystemGrid = createGridPlane(16, 0.5f);
+    Mesh cartesianSystemGrid = createGridPlane(32, 0.5f);
     cartesianSystemGrid.push();
 
     constexpr glm::fvec3 up(0.0f, 1.0f, 0.0f);
@@ -129,6 +128,8 @@ void run( glWindow &window )
     bool leftClick = false;
 
     GLFWwindow *const winPtr = window.getPointer();
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_LINE_SMOOTH);
 
     while (!window.shouldClose()) {
         const glm::dmat4 proj = glm::perspectiveFov<double>(glm::radians(45.0), window.getWidth(), window.getHeight(), 0.03, 1024.0);
@@ -143,11 +144,15 @@ void run( glWindow &window )
         const glm::dmat4 ROT = glm::rotate(-rotation.y, X) * glm::rotate(-rotation.x, Y);
 
         glm::fmat4 MVP = proj * ROT * glm::translate(-position);
-        render(window, MVP, cartesian, meshes);
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
         cartesianSystem.setMatrixFloat4("MVP", MVP);
         cartesianSystem.Bind();
         cartesianSystemGrid.render();
+
+        glEnable(GL_DEPTH_TEST);
+        render(window, MVP, cartesian, meshes);
         window.swap();
         glfwPollEvents();
     }
@@ -161,7 +166,7 @@ int main()
         return 1;
     }
 
-    glWindow window("Test", 1280, 720, false, 4, 6);
+    glWindow window("Test");
 
     if (glewInit() != GLEW_OK) {
         std::cerr << "Could not initialize GLEW" << std::endl;
