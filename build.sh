@@ -8,7 +8,7 @@ cd build
 make -j4
 
 cd ../../..
-echo $PWD
+mkdir libs
 cp modules/glfw/build/src/libglfw3.a libs/libglfw3.a
 
 mkdir build
