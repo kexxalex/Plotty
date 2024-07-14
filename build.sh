@@ -1,18 +1,31 @@
 #!/usr/bin/bash
 
-cd modules/glfw
-mkdir build
-cmake -S . -B build -D BUILD_SHARED_LIBS=OFF -D GLFW_BUILD_EXAMPLES=OFF -D GLFW_BUILD_TESTS=OFF -D GLFW_BUILD_DOCS=OFF
+ROOTDIRECTORY=$PWD
 
-cd build
-make -j4
+# COMPILE MODULES IF NECESSARY
+if [ ! -f libs/libglfw3.a ]; then
+    cd modules/glfw
+    if [ ! -d build ]; then
+        mkdir build
+    fi
+    cmake -S . -B build -D BUILD_SHARED_LIBS=OFF -D GLFW_BUILD_EXAMPLES=OFF -D GLFW_BUILD_TESTS=OFF -D GLFW_BUILD_DOCS=OFF
 
-cd ../../..
-mkdir libs
-cp modules/glfw/build/src/libglfw3.a libs/libglfw3.a
+    cd build
+    make
 
-mkdir build
+    cd $ROOTDIRECTORY
+    if [ ! -d libs ]; then
+        mkdir libs
+    fi
+    cp modules/glfw/build/src/libglfw3.a libs/libglfw3.a
+fi
+
+# COMPILE MAIN PROGRAM
+if [ ! -d build ]; then
+    mkdir build
+fi
+
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j4
+make
 mv Plotty ../Plotty

@@ -1,0 +1,9 @@
+<toolSet name="External Tools">
+  <tool name="Plotty Build" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="false" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="/mnt/data/CPP/Plotty/build.sh" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="/mnt/data/CPP/Plotty" />
+    </exec>
+  </tool>
+</toolSet>

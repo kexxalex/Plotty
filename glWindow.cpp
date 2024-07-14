@@ -5,13 +5,12 @@
 
 static void sizeCallback( GLFWwindow *window, int width, int height )
 {
-    glWindow *const win = static_cast<glWindow *>(glfwGetWindowUserPointer(window));
-    if (win)
+    if (auto win = static_cast<glWindow *>(glfwGetWindowUserPointer(window)))
         win->setSize(width, height);
 }
 
 
-glWindow::glWindow( const std::string &title, int width, int height, bool fullscreen, int gl_major, int gl_minor )
+glWindow::glWindow( const std::string &title, const int width, const int height, const bool fullscreen, const int gl_major, const int gl_minor )
     : m_window(nullptr)
     , m_frameTimes{ }
     , m_lastFrame(glfwGetTime())
@@ -50,9 +49,6 @@ glWindow::glWindow( const std::string &title, int width, int height, bool fullsc
 
     makeCurrent();
 
-    std::cout << "GL context version: " << gl_major << '.' << glGetString(GL_VERSION) << '\n';
-
-    glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, m_width, m_height);
     glfwSetWindowUserPointer(m_window, this);
 

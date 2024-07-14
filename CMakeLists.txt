@@ -15,8 +15,10 @@ set(FILES
 
 
 link_directories(${PROJECT_SOURCE_DIR}/libs)
-add_executable(${PROJECT_NAME} ${FILES})
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/modules/glfw/include)
+include_directories(${PROJECT_SOURCE_DIR}/modules/glm)
+
+add_executable(${PROJECT_NAME} ${FILES})
 target_link_libraries(${PROJECT_NAME} GL glfw3)

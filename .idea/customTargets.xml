@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="540179b8-69ef-4392-a6f1-67e8d28e1f98" name="Plotty Custom" defaultType="TOOL">
+      <configuration id="eb9c7672-c000-4099-a2a3-fdfd8e20ae09" name="Plotty Custom" toolchainName="Default">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_Plotty Build" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>
