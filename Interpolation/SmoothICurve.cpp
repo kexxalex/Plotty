@@ -1,4 +1,4 @@
-#include "SmoothCurve.hpp"
+#include "SmoothICurve.hpp"
 #include <cmath>
 
 u32 bisect( const std::vector<f32> &values, const f32 t )
@@ -227,7 +227,10 @@ glm::fvec3 SmoothICurve::at( f32 t ) const
 
     const f32 inv_h6 = inv_h / 6.0f;
 
-    return M1 * ((t - t0) * (t - t0) * (t - t0) * inv_h6) - M0 * ((t - t1) * (t - t1) * (t - t1) * inv_h6) + D * (t - t0) - C * (t - t1);
+    const float dt0 = t - t0;
+    const float dt1 = t1 - t;
+
+    return M1 * (dt0 * dt0 * dt0 * inv_h6) + M0 * (dt1 * dt1 * dt1 * inv_h6) + D * dt0 + C * dt1;
 }
 
 glm::fvec3 SmoothICurve::diffAt( f32 t ) const
@@ -256,7 +259,10 @@ glm::fvec3 SmoothICurve::diffAt( f32 t ) const
 
     const f32 inv_h2 = inv_h * 0.5f;
 
-    return M1 * ((t - t0) * (t - t0) * inv_h2) - M0 * ((t - t1) * (t - t1) * inv_h2) + D - C;
+    const float dt0 = t - t0;
+    const float dt1 = t1 - t;
+
+    return M1 * (dt0 * dt0 * inv_h2) - M0 * (dt1 * dt1 * inv_h2) + D - C;
 }
 
 glm::fvec3 SmoothICurve::diff2At( f32 t ) const
@@ -308,8 +314,11 @@ void SmoothICurve::diffs( f32 t, glm::fvec3 &T, glm::fvec3 &N ) const
     const glm::fvec3 C = y0 * inv_h - M0 * (h / 6.0f);
     const glm::fvec3 D = y1 * inv_h - M1 * (h / 6.0f);
 
-    T = M1 * ((t - t0) * (t - t0) * inv_h2) - M0 * ((t - t1) * (t - t1) * inv_h2) + D - C;
-    N = M1 * ((t - t0) * inv_h) - M0 * ((t - t1) * inv_h);
+    const float dt0 = t - t0;
+    const float dt1 = t1 - t;
+
+    T = M1 * (dt0 * dt0 * inv_h2) - M0 * (dt1 * dt1 * inv_h2) + D - C;
+    N = M1 * (dt0 * inv_h) + M0 * (dt1 * inv_h);
 }
 
 glm::fvec3 SmoothICurve::getTangent( f32 t ) const
@@ -369,9 +378,12 @@ glm::fmat4 SmoothICurve::getOrthonormalFrame( f32 t ) const
     const glm::fvec3 C = y0 * inv_h - M0 * (h / 6.0f);
     const glm::fvec3 D = y1 * inv_h - M1 * (h / 6.0f);
 
-    const glm::fvec3 P = M1 * ((t - t0) * (t - t0) * (t - t0) * inv_h6) - M0 * ((t - t1) * (t - t1) * (t - t1) * inv_h6) + D * (t - t0) - C * (t - t1);
-    const glm::fvec3 T = glm::normalize(M1 * ((t - t0) * (t - t0) * inv_h2) - M0 * ((t - t1) * (t - t1) * inv_h2) + D - C);
-    glm::fvec3 N = M1 * ((t - t0) * inv_h) - M0 * ((t - t1) * inv_h);
+    const float dt0 = t - t0;
+    const float dt1 = t1 - t;
+
+    const glm::fvec3 P = M1 * (dt0 * dt0 * dt0 * inv_h6) + M0 * (dt1 * dt1 * dt1 * inv_h6) + D * dt0 + C * dt1;
+    const glm::fvec3 T = glm::normalize(M1 * (dt0 * dt0 * inv_h2) - M0 * (dt1 * dt1 * inv_h2) + D - C);
+    glm::fvec3 N = M1 * (dt0 * inv_h) + M0 * (dt1 * inv_h);
     N -= glm::dot(T, N) * T;
     N = glm::normalize(N);
     const glm::fvec3 B = glm::normalize(glm::cross(T, N));

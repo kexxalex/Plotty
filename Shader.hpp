@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include "defines.hpp"
 

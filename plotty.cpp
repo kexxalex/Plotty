@@ -1,11 +1,11 @@
 #define GLM_ENABLE_EXPERIMENTAL
+// #define GLAD_GL_IMPLEMENTATION
+#include <glad/glad.h>
 
-#include <GL/glew.h>
 #include "glWindow.hpp"
 #include <iostream>
 #include "CSVReader.hpp"
-#include "Mesh.hpp"
-#include "SmoothCurve.hpp"
+#include "Interpolation/SmoothICurve.hpp"
 #include "Shader.hpp"
 //#include <glm/glm.hpp>
 //#include <glm/ext.hpp>
@@ -168,11 +168,8 @@ int main()
 
     glWindow window("Test");
 
-    if (glewInit() != GLEW_OK) {
-        std::cerr << "Could not initialize GLEW" << std::endl;
-        glfwTerminate();
-        return 2;
-    }
+    const int version = gladLoadGL(glfwGetProcAddress);
+    printf("GL Version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
     glEnable(GL_DEPTH_TEST);
 

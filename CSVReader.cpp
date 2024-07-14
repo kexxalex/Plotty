@@ -45,7 +45,7 @@ CSVFile::CSVFile( const std::string &filename )
 {
     m_isOk = std::filesystem::is_regular_file(filename);
     if (!m_isOk)
-        std::cerr << "File \"" << m_filename << "\" does not exist." << std::endl;
+        std::clog << "File \"" << m_filename << "\" does not exist." << std::endl;
 }
 
 bool CSVFile::read( const char separator )
@@ -55,7 +55,7 @@ bool CSVFile::read( const char separator )
 
     std::ifstream f(m_filename);
     if (!f) {
-        std::cerr << "Cannot read file \"" << m_filename << "\"" << std::endl;
+        std::clog << "Cannot read file \"" << m_filename << "\"" << std::endl;
         return false;
     }
 
@@ -91,7 +91,7 @@ bool CSVFile::read( const char separator )
 const std::vector<std::string> *CSVFile::getColumn( const std::string &name ) const noexcept
 {
     if (!m_header.contains(name)) {
-        std::cerr << "No column <" << name << "> in file \"" << m_filename << "\"" << std::endl;
+        std::clog << "No column <" << name << "> in file \"" << m_filename << "\"" << std::endl;
         return nullptr;
     }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "CSVReader.hpp"
 #include <glm/glm.hpp>
 

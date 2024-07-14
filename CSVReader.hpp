@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <iostream>
 
 
 using StringTabular = std::vector<std::vector<std::string>>;
