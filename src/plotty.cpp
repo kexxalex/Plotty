@@ -1,12 +1,17 @@
 #define GLM_ENABLE_EXPERIMENTAL
-// #define GLAD_GL_IMPLEMENTATION
-#include <glad/glad.h>
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
+#endif
 
-#include "glWindow.hpp"
+// #define GLAD_GL_IMPLEMENTATION
+#include <glad.h>
+
+#include "GUI/glWindow.hpp"
 #include <iostream>
-#include "CSVReader.hpp"
-#include "Interpolation/SmoothICurve.hpp"
-#include "Shader.hpp"
+#include "IO/CSVReader.hpp"
+#include "3D/Interpolation/SmoothICurve.hpp"
+#include "Rendering/Shader.hpp"
 //#include <glm/glm.hpp>
 //#include <glm/ext.hpp>
 #include <glm/gtx/transform.hpp>
@@ -130,6 +135,7 @@ void run( glWindow &window )
     GLFWwindow *const winPtr = window.getPointer();
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
 
     while (!window.shouldClose()) {
         const glm::dmat4 proj = glm::perspectiveFov<double>(glm::radians(45.0), window.getWidth(), window.getHeight(), 0.03, 1024.0);
@@ -146,12 +152,14 @@ void run( glWindow &window )
         glm::fmat4 MVP = proj * ROT * glm::translate(-position);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
+        // glDisable(GL_DEPTH_TEST);
+        glLineWidth(1.0f);
         cartesianSystem.setMatrixFloat4("MVP", MVP);
         cartesianSystem.Bind();
         cartesianSystemGrid.render();
 
-        glEnable(GL_DEPTH_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glLineWidth(4.0f);
         render(window, MVP, cartesian, meshes);
         window.swap();
         glfwPollEvents();
@@ -170,8 +178,6 @@ int main()
 
     const int version = gladLoadGL(glfwGetProcAddress);
     printf("GL Version %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
-
-    glEnable(GL_DEPTH_TEST);
 
     run(window);
 

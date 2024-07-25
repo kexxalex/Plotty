@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include <glad/glad.h>
-#include "CSVReader.hpp"
+#include <glad.h>
+#include "IO/CSVReader.hpp"
 #include <glm/glm.hpp>
 
 class Mesh {
